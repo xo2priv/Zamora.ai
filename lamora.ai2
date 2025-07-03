@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zamora AI</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #1e1e1e;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      background: #121212;
+      padding: 1rem 2rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      border-bottom: 1px solid #333;
+    }
+
+    main {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    .chat {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .message {
+      padding: 1rem;
+      border-radius: 10px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .user {
+      background: #333;
+      align-self: flex-end;
+    }
+
+    .bot {
+      background: #444;
+      align-self: flex-start;
+    }
+
+    form {
+      display: flex;
+      justify-content: center;
+      padding: 1rem;
+      background: #121212;
+      border-top: 1px solid #333;
+    }
+
+    input {
+      flex: 1;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      margin-right: 1rem;
+      background: #2b2b2b;
+      color: white;
+    }
+
+    button {
+      padding: 0.75rem 1.25rem;
+      background: #0ea5e9;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0284c7;
+    }
+  </style>
+</head>
+<body>
+  <header>Zamora AI 💬</header>
+  <main>
+    <div class="chat" id="chatBox"></div>
+  </main>
+  <form id="chatForm">
+    <input type="text" id="userInput" placeholder="Type your message..." autocomplete="off" required />
+    <button type="submit">Send</button>
+  </form>
+
+  <script>
+    const API_KEY = "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";
+
+    const form = document.getElementById('chatForm');
+    const input = document.getElementById('userInput');
+    const chatBox = document.getElementById('chatBox');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const userMsg = input.value.trim();
+      if (!userMsg) return;
+
+      addMessage(userMsg, 'user');
+      input.value = '';
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: userMsg }],
+          temperature: 0.7
+        })
+      });
+
+      const data = await response.json();
+      const botMsg = data.choices?.[0]?.message?.content || "Sorry, I didn't understand that.";
+      addMessage(botMsg, 'bot');
+    });
+
+    function addMessage(message, role) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${role}`;
+      msgDiv.textContent = message;
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  </script>
+</body>
+</html>
